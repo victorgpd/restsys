@@ -18,4 +18,6 @@ export const HeaderContainer = styled.header`
   left: 246px;
 
   z-index: 1;
+
+  transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
 `;

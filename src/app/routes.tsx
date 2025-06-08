@@ -1,4 +1,4 @@
-import { RoutesEnums } from "../types/enums";
+import { RoutesEnums, RoutesPrivateEnums } from "../types/enums";
 
 import Dashboard from "../pages/Dashboard";
 
@@ -19,7 +19,7 @@ export const screensRoutes = [
 
 export const privateRoutes = [
   {
-    path: RoutesEnums.Dashboard,
+    path: RoutesPrivateEnums.Dashboard,
     element: <Dashboard />,
   },
 ];

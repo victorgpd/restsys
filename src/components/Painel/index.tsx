@@ -1,10 +1,13 @@
+import { useAppSelector } from "../../utils/useStore";
 import { MenuContainer, PainelContainer } from "./styles";
 
 const Painel = ({ children }: { children: React.ReactNode }) => {
+  const { menuIsOpen } = useAppSelector((state) => state.globalReducer);
+
   return (
     <>
-      <MenuContainer></MenuContainer>
-      <PainelContainer>{children}</PainelContainer>
+      <MenuContainer style={{ left: menuIsOpen ? 0 : "-246px" }}></MenuContainer>
+      <PainelContainer style={{ paddingLeft: menuIsOpen ? 246 : 0 }}>{children}</PainelContainer>
     </>
   );
 };

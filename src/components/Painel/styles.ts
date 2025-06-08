@@ -1,6 +1,8 @@
 import styled from "styled-components";
 
-export const PainelContainer = styled.div``;
+export const PainelContainer = styled.div`
+  transition: padding 0.3s ease-in-out;
+`;
 
 export const MenuContainer = styled.aside`
   width: 246px;
