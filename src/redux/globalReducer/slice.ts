@@ -5,7 +5,7 @@ interface initialStateType {
 }
 
 const initialState: initialStateType = {
-  menuIsOpen: false,
+  menuIsOpen: true,
 };
 
 const globalSlice = createSlice({
