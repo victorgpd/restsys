@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const HeaderContainer = styled.header`
-  width: 100%;
+  width: calc(100% - 246px);
   height: 70px;
   padding: 16px 24px;
 
@@ -12,4 +12,10 @@ export const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  position: fixed;
+  top: 0;
+  left: 246px;
+
+  z-index: 1;
 `;

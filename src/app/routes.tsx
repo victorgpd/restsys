@@ -1,5 +1,7 @@
 import { RoutesEnums } from "../types/enums";
 
+import Dashboard from "../pages/Dashboard";
+
 export const screensRoutes = [
   {
     path: RoutesEnums.Home,
@@ -18,6 +20,6 @@ export const screensRoutes = [
 export const privateRoutes = [
   {
     path: RoutesEnums.Dashboard,
-    element: <h1>Dashboard</h1>,
+    element: <Dashboard />,
   },
 ];
