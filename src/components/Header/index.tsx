@@ -13,7 +13,7 @@ const Header = () => {
   };
 
   return (
-    <HeaderContainer style={{ width: menuIsOpen ? "calc(100% - 246px)" : "100%", left: menuIsOpen ? 246 : 0 }}>
+    <HeaderContainer style={window.location.pathname.includes("dashboard") ? { width: menuIsOpen ? "calc(100% - 246px)" : "100%", left: menuIsOpen ? 246 : 0 } : { width: "100%", left: 0 }}>
       {window.location.pathname.includes("dashboard") && <Button type="text" onClick={handleToggleMenu} icon={<MenuOutlined style={{ color: "#fff" }} />} style={{ fontSize: "1.5rem" }} />}
     </HeaderContainer>
   );
