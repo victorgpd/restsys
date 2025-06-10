@@ -35,16 +35,46 @@ const Login = () => {
   const [isFormValid, setIsFormValid] = useState(false);
 
   const [error, setError] = useState("");
+  const [wasSubmitted, setWasSubmitted] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const isEmailValid = EMAIL_REGEX.test(email);
-    const isPasswordValid = password.length >= 6;
-    const isAgencyValid = agency.length === 4;
-    const isAccountValid = account.replace(/\D/g, "").length === 7;
+    const newErrors: Record<string, string> = {};
 
-    const formValid = (loginType === "email" && isEmailValid && isPasswordValid) || (loginType === "account" && isAgencyValid && isAccountValid && isPasswordValid);
+    if (loginType === "email") {
+      if (!email) {
+        newErrors.email = "O e-mail é obrigatório.";
+      } else if (!EMAIL_REGEX.test(email)) {
+        newErrors.email = "E-mail inválido.";
+      }
 
-    setIsFormValid(formValid);
+      if (!password) {
+        newErrors.password = "A senha é obrigatória.";
+      } else if (password.length < 6) {
+        newErrors.password = "A senha deve ter ao menos 6 caracteres.";
+      }
+    } else {
+      if (!agency) {
+        newErrors.agency = "A agência é obrigatória.";
+      } else if (agency.length !== 4) {
+        newErrors.agency = "A agência deve conter 4 dígitos.";
+      }
+
+      if (!account) {
+        newErrors.account = "A conta é obrigatória.";
+      } else if (account.replace(/\D/g, "").length !== 7) {
+        newErrors.account = "A conta deve conter 6 dígitos + 1 verificador.";
+      }
+
+      if (!password) {
+        newErrors.password = "A senha é obrigatória.";
+      } else if (password.length < 6) {
+        newErrors.password = "A senha deve ter ao menos 6 caracteres.";
+      }
+    }
+
+    setFieldErrors(newErrors);
+    setIsFormValid(Object.keys(newErrors).length === 0);
   }, [email, password, agency, account, loginType]);
 
   const handleLoginTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +83,8 @@ const Login = () => {
 
   const handleChangeInputs = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
+
+    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
 
     switch (name) {
       case "email":
@@ -80,12 +112,21 @@ const Login = () => {
     return `${digits.slice(0, 6)}-${digits[6]}`;
   };
 
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    setWasSubmitted(true);
+
+    if (!isFormValid) return;
+
+    setError(""); // limpar erro geral
+  };
+
   return (
     <LoginPageContainer>
       <LoginContainer>
         <LoginLogotipo src="/images/logotipo.png" alt="Logo" />
 
-        <LoginTitle>Login</LoginTitle>
+        <LoginTitle>Entrar</LoginTitle>
 
         <LoginTypeContainer>
           <LoginType>
@@ -98,21 +139,25 @@ const Login = () => {
           </LoginType>
         </LoginTypeContainer>
 
-        <LoginForm>
+        <LoginForm onSubmit={handleSubmit}>
           {loginType === "email" ? (
             <LoginFormItem>
               <LoginFormTitle htmlFor="email">E-mail</LoginFormTitle>
               <LoginFormInput type="email" placeholder="E-mail" id="email" name="email" value={email} onChange={handleChangeInputs} />
+              {wasSubmitted && fieldErrors.email && <LoginTextError>{fieldErrors.email}</LoginTextError>}
             </LoginFormItem>
           ) : (
             <>
               <LoginFormItem>
                 <LoginFormTitle htmlFor="agency">Agência</LoginFormTitle>
                 <LoginFormInput placeholder="Agência" id="agency" name="agency" value={agency} onChange={handleChangeInputs} onBlur={handleAgencyBlur} maxLength={4} />
+                {wasSubmitted && fieldErrors.agency && <LoginTextError>{fieldErrors.agency}</LoginTextError>}
               </LoginFormItem>
+
               <LoginFormItem>
                 <LoginFormTitle htmlFor="account">Conta</LoginFormTitle>
                 <LoginFormInput placeholder="Conta (com verificador)" id="account" name="account" value={account} onChange={handleChangeInputs} maxLength={8} />
+                {wasSubmitted && fieldErrors.account && <LoginTextError>{fieldErrors.account}</LoginTextError>}
               </LoginFormItem>
             </>
           )}
@@ -120,9 +165,10 @@ const Login = () => {
           <LoginFormItem>
             <LoginFormTitle htmlFor="password">Senha</LoginFormTitle>
             <LoginFormInput.Password type="password" placeholder="Senha" id="password" name="password" value={password} onChange={handleChangeInputs} />
+            {wasSubmitted && fieldErrors.password && <LoginTextError>{fieldErrors.password}</LoginTextError>}
           </LoginFormItem>
 
-          <LoginFormButton variant="solid" color="default" htmlType="submit" disabled={!isFormValid}>
+          <LoginFormButton variant="solid" color="default" htmlType="submit">
             Entrar
           </LoginFormButton>
         </LoginForm>
