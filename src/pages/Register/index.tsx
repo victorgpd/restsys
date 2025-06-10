@@ -2,17 +2,18 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   RegisterContainer,
-  RegisterContainerRegister,
+  RegisterContainerLogin,
   RegisterForm,
   RegisterFormButton,
+  RegisterFormError,
   RegisterFormInput,
   RegisterFormItem,
   RegisterFormTitle,
   RegisterLogotipo,
   RegisterPageContainer,
   RegisterTextError,
-  RegisterTextRegister,
-  RegisterTextRegisterLink,
+  RegisterTextLogin,
+  RegisterTextLoginLink,
   RegisterTitle,
 } from "./styles";
 import { RoutesEnums } from "../../types/enums";
@@ -35,18 +36,59 @@ const Register = () => {
   const [isFormValid, setIsFormValid] = useState(false);
 
   const [error, setError] = useState("");
+  const [wasSubmitted, setWasSubmitted] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const isAtLeast16YearsOld = (birthDateString: string): boolean => {
+    if (!birthDateString) return false;
+
+    // Deve estar no formato ISO: yyyy-mm-dd
+    const isISOFormat = /^\d{4}-\d{2}-\d{2}$/.test(birthDateString);
+    if (!isISOFormat) return false;
+
+    const parsedDate = new Date(birthDateString);
+    const isValidDate = !isNaN(parsedDate.getTime());
+    if (!isValidDate) return false;
+
+    // Verifica se o ano é realista (ex: maior que 1900)
+    const birthYear = parsedDate.getFullYear();
+    if (birthYear < 1900) return false;
+
+    const today = new Date();
+    const sixteenYearsAgo = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+
+    return parsedDate <= sixteenYearsAgo;
+  };
 
   useEffect(() => {
-    const isEmailValid = EMAIL_REGEX.test(user.email);
-    const isPasswordValid = user.password.length >= 6;
-    const isNameValid = user.name.trim().length > 2;
-    const isCPFValid = user.cpf.replace(/\D/g, "").length === 11;
-    const isPhoneValid = user.phone.replace(/\D/g, "").length >= 11;
-    const isBirthDateValid = Boolean(user.birthDate);
+    const errors: Record<string, string> = {};
 
-    const formValid = isEmailValid && isPasswordValid && isNameValid && isCPFValid && isPhoneValid && isBirthDateValid;
+    if (!user.name.trim() || user.name.trim().length <= 2) {
+      errors.name = "O nome deve ter pelo menos 3 letras.";
+    }
 
-    setIsFormValid(formValid);
+    if (user.cpf.replace(/\D/g, "").length !== 11) {
+      errors.cpf = "O CPF deve conter 11 números.";
+    }
+
+    if (user.phone.replace(/\D/g, "").length < 11) {
+      errors.phone = "Número de telefone inválido.";
+    }
+
+    if (!EMAIL_REGEX.test(user.email)) {
+      errors.email = "E-mail inválido.";
+    }
+
+    if (user.password.length < 6) {
+      errors.password = "A senha deve conter pelo menos 6 caracteres.";
+    }
+
+    if (!isAtLeast16YearsOld(user.birthDate)) {
+      errors.birthDate = "Você precisa ter pelo menos 16 anos.";
+    }
+
+    setFieldErrors(errors);
+    setIsFormValid(Object.keys(errors).length === 0);
   }, [user]);
 
   const formatCPF = (cpf: string): string => {
@@ -81,6 +123,18 @@ const Register = () => {
     }));
   };
 
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    setWasSubmitted(true);
+
+    if (isFormValid) {
+      // Aqui você pode enviar os dados para o backend
+      console.log("Formulário válido:", user);
+      // Por exemplo:
+      // navigate(RoutesEnums.Home);
+    }
+  };
+
   return (
     <RegisterPageContainer>
       <RegisterContainer>
@@ -88,49 +142,55 @@ const Register = () => {
 
         <RegisterTitle>Cadastro</RegisterTitle>
 
-        <RegisterForm>
+        <RegisterForm onSubmit={handleSubmit}>
           <RegisterFormItem>
             <RegisterFormTitle htmlFor="name">Nome</RegisterFormTitle>
             <RegisterFormInput type="text" placeholder="Nome" id="name" name="name" value={user.name} onChange={handleChangeInputs} />
+            {wasSubmitted && fieldErrors.name && <RegisterFormError>{fieldErrors.name}</RegisterFormError>}
           </RegisterFormItem>
 
           <RegisterFormItem>
             <RegisterFormTitle htmlFor="cpf">CPF</RegisterFormTitle>
             <RegisterFormInput type="text" placeholder="CPF (somente números)" id="cpf" name="cpf" value={user.cpf} onChange={handleChangeInputs} maxLength={14} />
+            {wasSubmitted && fieldErrors.cpf && <RegisterFormError>{fieldErrors.cpf}</RegisterFormError>}
           </RegisterFormItem>
 
           <RegisterFormItem>
             <RegisterFormTitle htmlFor="birthDate">Data de nascimento</RegisterFormTitle>
             <RegisterFormInput type="date" placeholder="Data de nascimento" id="birthDate" name="birthDate" value={user.birthDate} onChange={handleChangeInputs} max={"2007-12-31"} />
+            {wasSubmitted && fieldErrors.birthDate && <RegisterFormError>{fieldErrors.birthDate}</RegisterFormError>}
           </RegisterFormItem>
 
           <RegisterFormItem>
             <RegisterFormTitle htmlFor="phone">Telefone</RegisterFormTitle>
             <RegisterFormInput type="text" placeholder="Telefone" id="phone" name="phone" value={user.phone} onChange={handleChangeInputs} maxLength={15} />
+            {wasSubmitted && fieldErrors.phone && <RegisterFormError>{fieldErrors.phone}</RegisterFormError>}
           </RegisterFormItem>
 
           <RegisterFormItem>
             <RegisterFormTitle htmlFor="email">E-mail</RegisterFormTitle>
             <RegisterFormInput type="email" placeholder="E-mail" id="email" name="email" value={user.email} onChange={handleChangeInputs} />
+            {wasSubmitted && fieldErrors.email && <RegisterFormError>{fieldErrors.email}</RegisterFormError>}
           </RegisterFormItem>
 
           <RegisterFormItem>
             <RegisterFormTitle htmlFor="password">Senha</RegisterFormTitle>
             <RegisterFormInput.Password type="password" placeholder="Senha" id="password" name="password" value={user.password} onChange={handleChangeInputs} />
+            {wasSubmitted && fieldErrors.password && <RegisterFormError>{fieldErrors.password}</RegisterFormError>}
           </RegisterFormItem>
 
-          <RegisterFormButton variant="solid" color="default" htmlType="submit" disabled={!isFormValid}>
+          <RegisterFormButton variant="solid" color="default" htmlType="submit">
             Cadastrar
           </RegisterFormButton>
         </RegisterForm>
 
         {error && <RegisterTextError>{error}</RegisterTextError>}
 
-        <RegisterContainerRegister>
-          <RegisterTextRegister>
-            Já possui uma conta? <RegisterTextRegisterLink onClick={() => navigate(RoutesEnums.Login)}>Entrar</RegisterTextRegisterLink>
-          </RegisterTextRegister>
-        </RegisterContainerRegister>
+        <RegisterContainerLogin>
+          <RegisterTextLogin>
+            Já possui uma conta? <RegisterTextLoginLink onClick={() => navigate(RoutesEnums.Login)}>Entrar</RegisterTextLoginLink>
+          </RegisterTextLogin>
+        </RegisterContainerLogin>
       </RegisterContainer>
     </RegisterPageContainer>
   );

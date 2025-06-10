@@ -3,8 +3,7 @@ import styled from "styled-components";
 
 export const RegisterPageContainer = styled.div`
   height: 100%;
-
-  gap: 20px;
+  gap: 12px;
   display: flex;
   flex-flow: column;
   align-items: center;
@@ -13,38 +12,12 @@ export const RegisterPageContainer = styled.div`
 
 export const RegisterContainer = styled.div`
   width: 100%;
-  max-width: 400px;
-  padding: 24px 16px;
+  max-width: 360px;
+  padding: 16px 12px;
   border-radius: 8px;
 
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-  gap: 20px;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-`;
-
-export const RegisterLogotipo = styled.img`
-  width: 100px;
-  height: 100px;
-`;
-
-export const RegisterTitle = styled.h1`
-  color: #333;
-  font-size: 2.2rem;
-`;
-
-export const RegisterTextError = styled.span`
-  color: red;
-  font-size: 0.9rem;
-`;
-
-export const RegisterForm = styled.form`
-  width: 100%;
-  max-width: 300px;
-  margin-top: 30px;
 
   gap: 16px;
   display: flex;
@@ -52,10 +25,30 @@ export const RegisterForm = styled.form`
   align-items: center;
 `;
 
+export const RegisterLogotipo = styled.img`
+  width: 64px;
+  height: 64px;
+`;
+
+export const RegisterTitle = styled.h1`
+  color: #333;
+  font-size: 1.6rem;
+`;
+
+export const RegisterForm = styled.form`
+  width: 100%;
+  max-width: 280px;
+  margin-top: 16px;
+
+  gap: 12px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+`;
+
 export const RegisterFormItem = styled.div`
   width: 100%;
-
-  gap: 7px;
+  gap: 4px;
   display: flex;
   flex-flow: column;
 `;
@@ -64,41 +57,46 @@ export const RegisterFormTitle = styled.label`
   color: #6a6c84;
   font-weight: 600;
   font-size: 0.9rem;
-  letter-spacing: 0.01px;
-
-  margin-left: 5px;
+  margin-left: 4px;
 `;
 
 export const RegisterFormInput = styled(Input)`
   width: 100%;
-
-  font-size: 1rem;
+  font-size: 0.9rem;
 `;
 
 export const RegisterFormButton = styled(Button)`
   width: 100%;
-  height: 35px;
-  font-size: 1rem;
+  height: 32px;
+  font-size: 0.9rem;
 `;
 
-export const RegisterContainerRegister = styled.div`
+export const RegisterFormError = styled.span`
+  color: red;
+  font-size: 0.75rem;
+`;
+
+export const RegisterTextError = styled.span`
+  color: red;
+  font-size: 0.9rem;
+`;
+
+export const RegisterContainerLogin = styled.div`
   width: 100%;
   text-align: center;
-
-  margin-top: 20px;
+  margin-top: 10px;
 `;
 
-export const RegisterTextRegister = styled.span`
+export const RegisterTextLogin = styled.span`
   color: #333;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 500;
+  font-size: 0.85rem;
 `;
 
-export const RegisterTextRegisterLink = styled.span`
+export const RegisterTextLoginLink = styled.span`
   color: blue;
-  font-weight: 600;
-  font-size: 0.9rem;
-
+  font-weight: 500;
+  font-size: 0.85rem;
   cursor: pointer;
 
   &:hover {
