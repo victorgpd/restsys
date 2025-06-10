@@ -73,6 +73,7 @@ const Login = () => {
       }
     }
 
+    setWasSubmitted(false);
     setFieldErrors(newErrors);
     setIsFormValid(Object.keys(newErrors).length === 0);
   }, [email, password, agency, account, loginType]);
