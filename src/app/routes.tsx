@@ -2,6 +2,7 @@ import { RoutesEnums, RoutesPrivateEnums } from "../types/enums";
 
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
+import Register from "../pages/Register";
 
 export const screensRoutes = [
   {
@@ -14,7 +15,7 @@ export const screensRoutes = [
   },
   {
     path: RoutesEnums.Register,
-    element: <h1>Register</h1>,
+    element: <Register />,
   },
 ];
 
