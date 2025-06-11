@@ -5,8 +5,12 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 import type { IUser } from "../types/types";
+import { useAppDispatch } from "../utils/useStore";
+import { setUser } from "../redux/globalReducer/slice";
 
 export const useAuthentication = () => {
+  const dispatch = useAppDispatch();
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -76,6 +80,8 @@ export const useAuthentication = () => {
         pixKeys: [],
         creditCard: null,
       });
+
+      dispatch(setUser({ uid: userResult.uid, cpf: user.cpf, name: user.name, phone: user.phone, email: user.email, password: user.password, birthDate: user.birthDate }));
 
       return;
     } catch (error: unknown) {
