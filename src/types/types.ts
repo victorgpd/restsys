@@ -1,4 +1,5 @@
 export interface IUser {
+  uid?: string;
   cpf: string;
   name: string;
   phone: string;
@@ -15,18 +16,15 @@ export interface IUserLogin {
 export interface IAccount {
   bank: string;
   agency: string;
-  number: string;
   balance: number;
   pixKeys: string[];
   proprietary: IUser;
+  numberAccount: string;
 
   creditCard: {
     cvv: string;
     limit: number;
     number: string;
     expirationDate: string;
-  };
-
-  createdAt: string;
-  updatedAt: string;
+  } | null;
 }

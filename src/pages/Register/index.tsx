@@ -16,8 +16,9 @@ import {
   RegisterTextLoginLink,
   RegisterTitle,
 } from "./styles";
-import { RoutesEnums } from "../../types/enums";
+import { RoutesEnums, RoutesPrivateEnums } from "../../types/enums";
 import type { IUser } from "../../types/types";
+import { useAuthentication } from "../../hooks/useAuthentication";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,9 +36,10 @@ const Register = () => {
 
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const [error, setError] = useState("");
   const [wasSubmitted, setWasSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const { register, loading, error } = useAuthentication();
 
   const isAtLeast16YearsOld = (birthDateString: string): boolean => {
     if (!birthDateString) return false;
@@ -123,15 +125,12 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setWasSubmitted(true);
 
     if (isFormValid) {
-      // Aqui você pode enviar os dados para o backend
-      console.log("Formulário válido:", user);
-      // Por exemplo:
-      // navigate(RoutesEnums.Home);
+      await register(user).then(() => navigate(RoutesPrivateEnums.Dashboard));
     }
   };
 
@@ -179,7 +178,7 @@ const Register = () => {
             {wasSubmitted && fieldErrors.password && <RegisterFormError>{fieldErrors.password}</RegisterFormError>}
           </RegisterFormItem>
 
-          <RegisterFormButton variant="solid" color="default" htmlType="submit">
+          <RegisterFormButton variant="solid" color="default" htmlType="submit" disabled={loading} loading={loading}>
             Cadastrar
           </RegisterFormButton>
         </RegisterForm>
