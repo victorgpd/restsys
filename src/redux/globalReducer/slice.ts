@@ -7,7 +7,7 @@ interface initialStateType {
 }
 
 const initialState: initialStateType = {
-  menuIsOpen: true,
+  menuIsOpen: false,
   user: null,
 };
 

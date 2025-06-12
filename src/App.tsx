@@ -1,16 +1,26 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { privateRoutes, screensRoutes } from "./app/routes";
-import Header from "./components/Header";
 import Main from "./components/Main";
+import Header from "./components/Header";
+
+import { privateRoutes, screensRoutes } from "./app/routes";
+import { createBrowserRouter, RouterProvider, type RouteObject } from "react-router-dom";
+import { useAuthentication } from "./hooks/useAuthentication";
 
 function App() {
-  const routes = createBrowserRouter([...screensRoutes, ...privateRoutes]);
+  const { verifyLoggedIn } = useAuthentication();
+
+  const routes: RouteObject[] = [...screensRoutes];
+  const routesLogged: RouteObject[] = [...privateRoutes].map((route) => ({
+    ...route,
+    loader: verifyLoggedIn,
+  }));
+
+  const router = createBrowserRouter([...routes, ...routesLogged]);
 
   return (
     <>
       <Header />
       <Main>
-        <RouterProvider router={routes} />
+        <RouterProvider router={router} />
       </Main>
     </>
   );

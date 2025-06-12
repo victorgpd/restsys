@@ -7,6 +7,8 @@ import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "fir
 import type { IUser } from "../types/types";
 import { useAppDispatch } from "../utils/useStore";
 import { setUser } from "../redux/globalReducer/slice";
+import { redirect } from "react-router-dom";
+import { RoutesEnums } from "../types/enums";
 
 export const useAuthentication = () => {
   const dispatch = useAppDispatch();
@@ -107,19 +109,52 @@ export const useAuthentication = () => {
     }
   };
 
-  const verifyLogged = () => {
+  const verifyLogged = (): Promise<IUser> => {
     setLoading(true);
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const users = await getDocuments<IUser>("usuarios", [where("email", "==", user.email)]);
-        dispatch(setUser(users[0]));
-      } else {
-        dispatch(setUser(null));
-      }
-      setLoading(false);
+
+    return new Promise((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        unsubscribe();
+
+        try {
+          if (user && user.email) {
+            const users = await getDocuments<IUser>("usuarios", [where("email", "==", user.email)]);
+
+            if (users.length > 0) {
+              const currentUser = users[0];
+              dispatch(setUser(currentUser));
+              resolve(currentUser);
+            } else {
+              dispatch(setUser(null));
+              reject("Usuário não autenticado.");
+            }
+          } else {
+            dispatch(setUser(null));
+            reject("Usuário não autenticado.");
+          }
+        } catch (err) {
+          reject(err);
+        } finally {
+          setLoading(false);
+        }
+      });
     });
-    return null;
   };
 
-  return { error, loading, register, verifyLogged };
+  const verifyLoggedIn = async () => {
+    return new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        unsubscribe();
+        if (user) {
+          dispatch(setUser(null));
+          resolve(null);
+        } else {
+          dispatch(setUser(null));
+          resolve(redirect(RoutesEnums.Login));
+        }
+      });
+    });
+  };
+
+  return { error, loading, register, verifyLogged, verifyLoggedIn };
 };

@@ -24,6 +24,10 @@ export const HeaderContainer = styled.header`
 
 export const HeaderLogoContainer = styled.div`
   height: 100%;
+
+  gap: 6px;
+  display: flex;
+  align-items: center;
 `;
 
 export const HeaderLinkLogo = styled.a`

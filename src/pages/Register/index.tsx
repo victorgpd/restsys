@@ -39,7 +39,7 @@ const Register = () => {
   const [wasSubmitted, setWasSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const { register, loading, error } = useAuthentication();
+  const { verifyLogged, register, loading, error } = useAuthentication();
 
   const isAtLeast16YearsOld = (birthDateString: string): boolean => {
     if (!birthDateString) return false;
@@ -92,6 +92,10 @@ const Register = () => {
     setFieldErrors(errors);
     setIsFormValid(Object.keys(errors).length === 0);
   }, [user]);
+
+  useEffect(() => {
+    verifyLogged().then(() => navigate(RoutesEnums.Home));
+  }, []);
 
   const formatCPF = (cpf: string): string => {
     const numbersOnly = cpf.replace(/\D/g, "").slice(0, 11);

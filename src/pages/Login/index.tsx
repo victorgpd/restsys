@@ -18,6 +18,7 @@ import {
   LoginTypeContainer,
 } from "./styles";
 import { RoutesEnums } from "../../types/enums";
+import { useAuthentication } from "../../hooks/useAuthentication";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -37,6 +38,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [wasSubmitted, setWasSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const { verifyLogged } = useAuthentication();
 
   useEffect(() => {
     const newErrors: Record<string, string> = {};
@@ -77,6 +80,10 @@ const Login = () => {
     setFieldErrors(newErrors);
     setIsFormValid(Object.keys(newErrors).length === 0);
   }, [email, password, agency, account, loginType]);
+
+  useEffect(() => {
+    verifyLogged().then(() => navigate(RoutesEnums.Home));
+  }, []);
 
   const handleLoginTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLoginType(event.target.value as "email" | "account");
