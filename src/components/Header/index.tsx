@@ -4,10 +4,18 @@ import { CloseOutlined, MenuOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "../../utils/useStore";
 import { setMenuIsOpen } from "../../redux/globalReducer/slice";
 import { RoutesEnums } from "../../types/enums";
+import { useEffect } from "react";
+import { useAuthentication } from "../../hooks/useAuthentication";
 
 const Header = () => {
   const dispatch = useAppDispatch();
-  const { menuIsOpen } = useAppSelector((state) => state.globalReducer);
+
+  const { verifyLogged } = useAuthentication();
+  const { menuIsOpen, user } = useAppSelector((state) => state.globalReducer);
+
+  useEffect(() => {
+    verifyLogged();
+  }, []);
 
   const handleToggleMenu = () => {
     dispatch(setMenuIsOpen(!menuIsOpen));
@@ -26,25 +34,35 @@ const Header = () => {
       </HeaderLogoContainer>
 
       <HeaderContainerButtons>
-        <Button
-          type="link"
-          variant="link"
-          style={{ color: "#fff" }}
-          onClick={() => {
-            window.location.href = RoutesEnums.Login;
-          }}
-        >
-          Entrar
-        </Button>
-        <Button
-          variant="solid"
-          color="blue"
-          onClick={() => {
-            window.location.href = RoutesEnums.Register;
-          }}
-        >
-          Cadastrar
-        </Button>
+        {!user && (
+          <>
+            <Button
+              type="link"
+              variant="link"
+              style={{ color: "#fff" }}
+              onClick={() => {
+                window.location.href = RoutesEnums.Login;
+              }}
+            >
+              Entrar
+            </Button>
+            <Button
+              variant="solid"
+              color="blue"
+              onClick={() => {
+                window.location.href = RoutesEnums.Register;
+              }}
+            >
+              Cadastrar
+            </Button>
+          </>
+        )}
+
+        {user && (
+          <>
+            <span>{user.name}</span>
+          </>
+        )}
       </HeaderContainerButtons>
     </HeaderContainer>
   );

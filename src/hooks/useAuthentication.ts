@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDocument } from "./useDocuments";
 import { app, db } from "../firebase/config";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 
 import type { IUser } from "../types/types";
 import { useAppDispatch } from "../utils/useStore";
@@ -14,7 +14,9 @@ export const useAuthentication = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { insertDocument } = useDocument();
+  const { insertDocument, getDocuments } = useDocument();
+
+  const auth = getAuth(app);
 
   const generateUniqueAccountNumber = async (collectionName = "contas", fieldName = "numberAccount"): Promise<number> => {
     const maxAttempts = 10;
@@ -36,8 +38,6 @@ export const useAuthentication = () => {
   const register = async (user: IUser) => {
     setError("");
     setLoading(true);
-
-    const auth = getAuth(app);
 
     try {
       const cpfQuery = query(collection(db, "usuarios"), where("cpf", "==", user.cpf));
@@ -107,5 +107,19 @@ export const useAuthentication = () => {
     }
   };
 
-  return { error, loading, register };
+  const verifyLogged = () => {
+    setLoading(true);
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const users = await getDocuments<IUser>("usuarios", [where("email", "==", user.email)]);
+        dispatch(setUser(users[0]));
+      } else {
+        dispatch(setUser(null));
+      }
+      setLoading(false);
+    });
+    return null;
+  };
+
+  return { error, loading, register, verifyLogged };
 };
