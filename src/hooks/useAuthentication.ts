@@ -11,6 +11,7 @@ import { redirect } from "react-router-dom";
 import { RoutesEnums } from "../types/enums";
 
 export const useAuthentication = () => {
+  const auth = getAuth(app);
   const dispatch = useAppDispatch();
 
   const [error, setError] = useState("");
@@ -18,20 +19,14 @@ export const useAuthentication = () => {
 
   const { insertDocument, getDocuments } = useDocument();
 
-  const auth = getAuth(app);
-
   const generateUniqueAccountNumber = async (collectionName = "contas", fieldName = "numberAccount"): Promise<number> => {
     const maxAttempts = 10;
-    let attempts = 0;
 
-    while (attempts < maxAttempts) {
-      const randomNumber = Math.floor(1000000 + Math.random() * 9000000); // número de conta com 7 dígitos
+    for (let attempts = 0; attempts < maxAttempts; attempts++) {
+      const randomNumber = Math.floor(1000000 + Math.random() * 9000000);
       const q = query(collection(db, collectionName), where(fieldName, "==", randomNumber));
       const snapshot = await getDocs(q);
-
       if (snapshot.empty) return randomNumber;
-
-      attempts++;
     }
 
     throw new Error("Não foi possível gerar um número de conta único.");
@@ -42,39 +37,24 @@ export const useAuthentication = () => {
     setLoading(true);
 
     try {
-      const cpfQuery = query(collection(db, "usuarios"), where("cpf", "==", user.cpf));
-      const cpfSnapshot = await getDocs(cpfQuery);
+      const cpfSnapshot = await getDocs(query(collection(db, "usuarios"), where("cpf", "==", user.cpf)));
 
       if (!cpfSnapshot.empty) {
-        setError("CPF já cadastrado.");
-        return Promise.reject(new Error("CPF já cadastrado."));
+        throw new Error("CPF já cadastrado.");
       }
 
-      const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password);
-      const userResult = userCredential.user;
-
+      const { user: userResult } = await createUserWithEmailAndPassword(auth, user.email, user.password);
       const accountNumber = await generateUniqueAccountNumber();
 
-      await insertDocument("usuarios", {
+      const userData: IUser = {
         uid: userResult.uid,
-        cpf: user.cpf,
-        name: user.name,
-        phone: user.phone,
-        email: user.email,
-        password: user.password,
-        birthDate: user.birthDate,
-      });
+        ...user,
+      };
+
+      await insertDocument("usuarios", userData);
 
       await insertDocument("contas", {
-        proprietary: {
-          uid: userResult.uid,
-          cpf: user.cpf,
-          name: user.name,
-          phone: user.phone,
-          email: user.email,
-          password: user.password,
-          birthDate: user.birthDate,
-        },
+        proprietary: userData,
         agency: "0001",
         numberAccount: accountNumber.toString(),
         balance: 0,
@@ -83,26 +63,17 @@ export const useAuthentication = () => {
         creditCard: null,
       });
 
-      dispatch(setUser({ uid: userResult.uid, cpf: user.cpf, name: user.name, phone: user.phone, email: user.email, password: user.password, birthDate: user.birthDate }));
-
-      return;
+      dispatch(setUser(userData));
     } catch (error: unknown) {
-      let systemErrorMessage;
+      let message = "Ocorreu um erro, por favor tente novamente mais tarde.";
 
       if (error instanceof Error) {
-        if (error.message.includes("Password")) {
-          systemErrorMessage = "A senha precisa conter pelo menos 6 caracteres.";
-        } else if (error.message.includes("email-already")) {
-          systemErrorMessage = "E-mail já cadastrado.";
-        } else if (error.message.includes("CPF já cadastrado")) {
-          systemErrorMessage = "CPF já cadastrado.";
-        } else {
-          systemErrorMessage = "Ocorreu um erro, por favor tente novamente mais tarde.";
-        }
-
-        setError(systemErrorMessage);
+        if (error.message.includes("Password")) message = "A senha precisa conter pelo menos 6 caracteres.";
+        if (error.message.includes("email-already")) message = "E-mail já cadastrado.";
+        if (error.message.includes("CPF já cadastrado")) message = "CPF já cadastrado.";
       }
 
+      setError(message);
       return Promise.reject(error);
     } finally {
       setLoading(false);
@@ -117,11 +88,11 @@ export const useAuthentication = () => {
         unsubscribe();
 
         try {
-          if (user && user.email) {
+          if (user?.email) {
             const users = await getDocuments<IUser>("usuarios", [where("email", "==", user.email)]);
+            const currentUser = users[0];
 
-            if (users.length > 0) {
-              const currentUser = users[0];
+            if (currentUser) {
               dispatch(setUser(currentUser));
               resolve(currentUser);
             } else {
@@ -141,20 +112,21 @@ export const useAuthentication = () => {
     });
   };
 
-  const verifyLoggedIn = async () => {
+  const verifyLoggedIn = (): Promise<null | Response> => {
     return new Promise((resolve) => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         unsubscribe();
-        if (user) {
-          dispatch(setUser(null));
-          resolve(null);
-        } else {
-          dispatch(setUser(null));
-          resolve(redirect(RoutesEnums.Login));
-        }
+        dispatch(setUser(null));
+        resolve(user ? null : redirect(RoutesEnums.Login));
       });
     });
   };
 
-  return { error, loading, register, verifyLogged, verifyLoggedIn };
+  return {
+    error,
+    loading,
+    register,
+    verifyLogged,
+    verifyLoggedIn,
+  };
 };
