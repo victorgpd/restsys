@@ -19,6 +19,8 @@ import {
 } from "./styles";
 import { RoutesEnums } from "../../types/enums";
 import { useAuthentication } from "../../hooks/useAuthentication";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,11 +37,12 @@ const Login = () => {
 
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const [error, setError] = useState("");
+  const [authChecked, setAuthChecked] = useState(false);
+
   const [wasSubmitted, setWasSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const { verifyLogged } = useAuthentication();
+  const { login, verifyLogged, error, loading } = useAuthentication();
 
   useEffect(() => {
     const newErrors: Record<string, string> = {};
@@ -82,8 +85,18 @@ const Login = () => {
   }, [email, password, agency, account, loginType]);
 
   useEffect(() => {
-    verifyLogged().then(() => navigate(RoutesEnums.Home));
-  }, []);
+    verifyLogged()
+      .then((user) => {
+        if (user) {
+          navigate(RoutesEnums.Home);
+        } else {
+          setAuthChecked(true); // só mostra login se usuário NÃO estiver logado
+        }
+      })
+      .catch(() => {
+        setAuthChecked(true); // mesmo se erro, libera exibição da tela
+      });
+  }, [navigate, verifyLogged]);
 
   const handleLoginTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLoginType(event.target.value as "email" | "account");
@@ -126,8 +139,24 @@ const Login = () => {
 
     if (!isFormValid) return;
 
-    setError(""); // limpar erro geral
+    if (loginType === "email") {
+      login({ email, password }).then(() => {
+        navigate(RoutesEnums.Home);
+      });
+    } else {
+      login({ agency, account, password });
+    }
   };
+
+  if (!authChecked) {
+    return (
+      <LoginPageContainer>
+        <Spin tip="Verificando autenticação..." indicator={<LoadingOutlined spin />} size="large" style={{ width: "200px", height: "200px" }}>
+          <div style={{ padding: 50, background: "rgba(0, 0, 0, 0.05)", borderRadius: 4 }} />
+        </Spin>
+      </LoginPageContainer>
+    );
+  }
 
   return (
     <LoginPageContainer>
@@ -176,7 +205,7 @@ const Login = () => {
             {wasSubmitted && fieldErrors.password && <LoginTextError>{fieldErrors.password}</LoginTextError>}
           </LoginFormItem>
 
-          <LoginFormButton variant="solid" color="default" htmlType="submit">
+          <LoginFormButton variant="solid" color="default" htmlType="submit" loading={loading}>
             Entrar
           </LoginFormButton>
         </LoginForm>

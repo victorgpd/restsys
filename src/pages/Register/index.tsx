@@ -19,6 +19,8 @@ import {
 import { RoutesEnums, RoutesPrivateEnums } from "../../types/enums";
 import type { IUser } from "../../types/types";
 import { useAuthentication } from "../../hooks/useAuthentication";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,6 +37,8 @@ const Register = () => {
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
+
+  const [authChecked, setAuthChecked] = useState(false);
 
   const [wasSubmitted, setWasSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -94,8 +98,18 @@ const Register = () => {
   }, [user]);
 
   useEffect(() => {
-    verifyLogged().then(() => navigate(RoutesEnums.Home));
-  }, []);
+    verifyLogged()
+      .then((user) => {
+        if (user) {
+          navigate(RoutesEnums.Home);
+        } else {
+          setAuthChecked(true); // só mostra login se usuário NÃO estiver logado
+        }
+      })
+      .catch(() => {
+        setAuthChecked(true); // mesmo se erro, libera exibição da tela
+      });
+  }, [navigate, verifyLogged]);
 
   const formatCPF = (cpf: string): string => {
     const numbersOnly = cpf.replace(/\D/g, "").slice(0, 11);
@@ -137,6 +151,16 @@ const Register = () => {
       await register(user).then(() => navigate(RoutesPrivateEnums.Dashboard));
     }
   };
+
+  if (!authChecked) {
+    return (
+      <RegisterPageContainer>
+        <Spin tip="Verificando autenticação..." indicator={<LoadingOutlined spin />} size="large" style={{ width: "200px", height: "200px" }}>
+          <div style={{ padding: 50, background: "rgba(0, 0, 0, 0.05)", borderRadius: 4 }} />
+        </Spin>
+      </RegisterPageContainer>
+    );
+  }
 
   return (
     <RegisterPageContainer>

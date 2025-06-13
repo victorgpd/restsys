@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDocument } from "./useDocuments";
 import { app, db } from "../firebase/config";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 
 import type { IUser } from "../types/types";
 import { useAppDispatch } from "../utils/useStore";
@@ -30,6 +30,46 @@ export const useAuthentication = () => {
     }
 
     throw new Error("Não foi possível gerar um número de conta único.");
+  };
+
+  const login = async (user: { email: string; password: string } | { agency: string; account: string; password: string }): Promise<IUser> => {
+    setError("");
+    setLoading(true);
+
+    try {
+      let users: IUser[] = [];
+
+      if ("agency" in user && "account" in user) {
+        users = await getDocuments<IUser>("usuarios", [where("proprietary.account", "==", user.account)]);
+        if (!users.length) throw new Error("Conta não encontrada.");
+        await signInWithEmailAndPassword(auth, users[0].email, user.password);
+      } else if ("email" in user) {
+        await signInWithEmailAndPassword(auth, user.email, user.password);
+        users = await getDocuments<IUser>("usuarios", [where("email", "==", user.email)]);
+      }
+
+      if (users.length === 0) {
+        throw new Error("Usuário não encontrado.");
+      }
+
+      dispatch(setUser(users[0]));
+      return users[0];
+    } catch (error: unknown) {
+      let message = "Ocorreu um erro, por favor tente novamente mais tarde.";
+
+      if (error instanceof Error) {
+        if (error.message.includes("user-not-found") || error.message.includes("wrong-password")) {
+          message = "E-mail ou senha incorretos.";
+        } else {
+          message = error.message;
+        }
+      }
+
+      setError(message);
+      return Promise.reject(new Error(message)); // Isso permite o uso de `.catch()`
+    } finally {
+      setLoading(false);
+    }
   };
 
   const register = async (user: IUser) => {
@@ -80,32 +120,50 @@ export const useAuthentication = () => {
     }
   };
 
-  const verifyLogged = (): Promise<IUser> => {
-    setLoading(true);
-
+  const verifyLogged = (): Promise<IUser | null> => {
     return new Promise((resolve, reject) => {
+      setLoading(true);
+      const current = auth.currentUser;
+
+      if (current?.email) {
+        getDocuments<IUser>("usuarios", [where("email", "==", current.email)])
+          .then((users) => {
+            const user = users[0];
+            if (user) {
+              dispatch(setUser(user));
+              resolve(user);
+            } else {
+              dispatch(setUser(null));
+              resolve(null);
+            }
+          })
+          .catch((err) => reject(err));
+
+        setLoading(false);
+        return;
+      }
+
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         unsubscribe();
-
-        try {
-          if (user?.email) {
+        if (user?.email) {
+          try {
             const users = await getDocuments<IUser>("usuarios", [where("email", "==", user.email)]);
             const currentUser = users[0];
-
             if (currentUser) {
               dispatch(setUser(currentUser));
               resolve(currentUser);
             } else {
               dispatch(setUser(null));
-              reject("Usuário não autenticado.");
+              resolve(null);
             }
-          } else {
-            dispatch(setUser(null));
-            reject("Usuário não autenticado.");
+          } catch (err) {
+            reject(err);
+          } finally {
+            setLoading(false);
           }
-        } catch (err) {
-          reject(err);
-        } finally {
+        } else {
+          dispatch(setUser(null));
+          resolve(null);
           setLoading(false);
         }
       });
@@ -114,10 +172,23 @@ export const useAuthentication = () => {
 
   const verifyLoggedIn = (): Promise<null | Response> => {
     return new Promise((resolve) => {
+      setLoading(true);
+      const current = auth.currentUser;
+
+      if (!current) {
+        setLoading(false);
+        return resolve(redirect(RoutesEnums.Login));
+      }
+
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         unsubscribe();
-        dispatch(setUser(null));
-        resolve(user ? null : redirect(RoutesEnums.Login));
+        if (user) {
+          setLoading(false);
+          resolve(null); // usuário autenticado
+        } else {
+          setLoading(false);
+          resolve(redirect(RoutesEnums.Login)); // redireciona se não autenticado
+        }
       });
     });
   };
@@ -125,6 +196,7 @@ export const useAuthentication = () => {
   return {
     error,
     loading,
+    login,
     register,
     verifyLogged,
     verifyLoggedIn,
