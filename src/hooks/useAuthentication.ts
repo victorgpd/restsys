@@ -122,7 +122,6 @@ export const useAuthentication = () => {
 
   const verifyLogged = (): Promise<IUser | null> => {
     return new Promise((resolve, reject) => {
-      setLoading(true);
       const current = auth.currentUser;
 
       if (current?.email) {
@@ -139,7 +138,6 @@ export const useAuthentication = () => {
           })
           .catch((err) => reject(err));
 
-        setLoading(false);
         return;
       }
 
@@ -158,13 +156,10 @@ export const useAuthentication = () => {
             }
           } catch (err) {
             reject(err);
-          } finally {
-            setLoading(false);
           }
         } else {
           dispatch(setUser(null));
           resolve(null);
-          setLoading(false);
         }
       });
     });
@@ -172,21 +167,17 @@ export const useAuthentication = () => {
 
   const verifyLoggedIn = (): Promise<null | Response> => {
     return new Promise((resolve) => {
-      setLoading(true);
       const current = auth.currentUser;
 
       if (!current) {
-        setLoading(false);
         return resolve(redirect(RoutesEnums.Login));
       }
 
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         unsubscribe();
         if (user) {
-          setLoading(false);
           resolve(null); // usuário autenticado
         } else {
-          setLoading(false);
           resolve(redirect(RoutesEnums.Login)); // redireciona se não autenticado
         }
       });
