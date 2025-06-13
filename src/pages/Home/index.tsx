@@ -1,6 +1,6 @@
 import Painel from "../../components/Painel";
 
-const Dashboard = () => {
+const Home = () => {
   return (
     <Painel>
       <h1>Dashboard</h1>
@@ -8,4 +8,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Home;

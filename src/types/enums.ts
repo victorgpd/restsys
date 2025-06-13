@@ -5,5 +5,5 @@ export enum RoutesEnums {
 }
 
 export enum RoutesPrivateEnums {
-  Dashboard = "/dashboard",
+  Home = "/home",
 }

@@ -17,7 +17,7 @@ import {
   LoginType,
   LoginTypeContainer,
 } from "./styles";
-import { RoutesEnums } from "../../types/enums";
+import { RoutesEnums, RoutesPrivateEnums } from "../../types/enums";
 import { useAuthentication } from "../../hooks/useAuthentication";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
@@ -141,7 +141,7 @@ const Login = () => {
 
     if (loginType === "email") {
       login({ email, password }).then(() => {
-        navigate(RoutesEnums.Home);
+        navigate(RoutesPrivateEnums.Home);
       });
     } else {
       login({ agency, account, password });

@@ -148,7 +148,7 @@ const Register = () => {
     setWasSubmitted(true);
 
     if (isFormValid) {
-      await register(user).then(() => navigate(RoutesPrivateEnums.Dashboard));
+      await register(user).then(() => navigate(RoutesPrivateEnums.Home));
     }
   };
 

@@ -1,7 +1,7 @@
 import { RoutesEnums, RoutesPrivateEnums } from "../types/enums";
 
 import Login from "../pages/Login";
-import Dashboard from "../pages/Dashboard";
+import Home from "../pages/Home";
 import Register from "../pages/Register";
 
 export const screensRoutes = [
@@ -21,7 +21,7 @@ export const screensRoutes = [
 
 export const privateRoutes = [
   {
-    path: RoutesPrivateEnums.Dashboard,
-    element: <Dashboard />,
+    path: RoutesPrivateEnums.Home,
+    element: <Home />,
   },
 ];

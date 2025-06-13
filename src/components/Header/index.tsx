@@ -22,9 +22,9 @@ const Header = () => {
   };
 
   return (
-    <HeaderContainer style={window.location.pathname.includes("dashboard") ? { width: menuIsOpen ? "calc(100% - 246px)" : "100%", left: menuIsOpen ? 246 : 0 } : { width: "100%", left: 0 }}>
+    <HeaderContainer style={window.location.pathname.includes("home") ? { width: menuIsOpen ? "calc(100% - 246px)" : "100%", left: menuIsOpen ? 246 : 0 } : { width: "100%", left: 0 }}>
       <HeaderLogoContainer>
-        {window.location.pathname.includes("dashboard") && (
+        {window.location.pathname.includes("home") && (
           <Button type="text" onClick={handleToggleMenu} icon={menuIsOpen ? <CloseOutlined style={{ color: "#fff" }} /> : <MenuOutlined style={{ color: "#fff" }} />} style={{ fontSize: "1.5rem" }} />
         )}
         <HeaderLinkLogo href="/">
