@@ -167,12 +167,6 @@ export const useAuthentication = () => {
 
   const verifyLoggedIn = (): Promise<null | Response> => {
     return new Promise((resolve) => {
-      const current = auth.currentUser;
-
-      if (!current) {
-        return resolve(redirect(RoutesEnums.Login));
-      }
-
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         unsubscribe();
         if (user) {
