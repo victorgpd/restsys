@@ -125,28 +125,6 @@ export const useAuthentication = () => {
 
   const verifyLogged = (): Promise<IUser | null> => {
     return new Promise((resolve, reject) => {
-      const current = auth.currentUser;
-
-      if (current?.email) {
-        getDocuments<IUser>("usuarios", [where("email", "==", current.email)])
-          .then(async (users) => {
-            const user = users[0];
-            if (user) {
-              const accounts = await getDocuments<IAccount>("contas", [where("email", "==", user.email)]);
-
-              dispatch(setAccount(accounts[0]));
-              dispatch(setUser(user));
-              resolve(user);
-            } else {
-              dispatch(setUser(null));
-              resolve(null);
-            }
-          })
-          .catch((err) => reject(err));
-
-        return;
-      }
-
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         unsubscribe();
         if (user?.email) {
@@ -154,6 +132,9 @@ export const useAuthentication = () => {
             const users = await getDocuments<IUser>("usuarios", [where("email", "==", user.email)]);
             const currentUser = users[0];
             if (currentUser) {
+              const accounts = await getDocuments<IAccount>("contas", [where("proprietary.email", "==", user.email)]);
+
+              dispatch(setAccount(accounts[0]));
               dispatch(setUser(currentUser));
               resolve(currentUser);
             } else {
