@@ -4,9 +4,9 @@ import { app, db } from "../firebase/config";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 
-import type { IUser } from "../types/types";
+import type { IAccount, IUser } from "../types/types";
 import { useAppDispatch } from "../utils/useStore";
-import { setUser } from "../redux/globalReducer/slice";
+import { setAccount, setUser } from "../redux/globalReducer/slice";
 import { redirect } from "react-router-dom";
 import { RoutesEnums } from "../types/enums";
 
@@ -38,21 +38,24 @@ export const useAuthentication = () => {
 
     try {
       let users: IUser[] = [];
+      let accounts: IAccount[] = [];
 
       if ("agency" in user && "account" in user) {
-        users = await getDocuments<IUser>("usuarios", [where("proprietary.account", "==", user.account)]);
-        if (!users.length) throw new Error("Conta não encontrada.");
-        await signInWithEmailAndPassword(auth, users[0].email, user.password);
+        accounts = await getDocuments<IAccount>("contas", [where("numberAccount", "==", user.account.replace("-", ""))]);
+        if (!accounts.length) throw new Error("Conta não encontrada.");
+        await signInWithEmailAndPassword(auth, accounts[0].proprietary.email, user.password);
+        users = await getDocuments<IUser>("usuarios", [where("email", "==", accounts[0].proprietary.email)]);
       } else if ("email" in user) {
         await signInWithEmailAndPassword(auth, user.email, user.password);
         users = await getDocuments<IUser>("usuarios", [where("email", "==", user.email)]);
+        accounts = await getDocuments<IAccount>("contas", [where("proprietary.email", "==", user.email)]);
       }
-
       if (users.length === 0) {
         throw new Error("Usuário não encontrado.");
       }
 
       dispatch(setUser(users[0]));
+      dispatch(setAccount(accounts[0]));
       return users[0];
     } catch (error: unknown) {
       let message = "Ocorreu um erro, por favor tente novamente mais tarde.";
@@ -126,9 +129,12 @@ export const useAuthentication = () => {
 
       if (current?.email) {
         getDocuments<IUser>("usuarios", [where("email", "==", current.email)])
-          .then((users) => {
+          .then(async (users) => {
             const user = users[0];
             if (user) {
+              const accounts = await getDocuments<IAccount>("contas", [where("email", "==", user.email)]);
+
+              dispatch(setAccount(accounts[0]));
               dispatch(setUser(user));
               resolve(user);
             } else {

@@ -88,7 +88,7 @@ const Login = () => {
     verifyLogged()
       .then((user) => {
         if (user) {
-          navigate(RoutesEnums.Home);
+          navigate(RoutesPrivateEnums.Home);
         } else {
           setAuthChecked(true); // só mostra login se usuário NÃO estiver logado
         }
@@ -133,18 +133,20 @@ const Login = () => {
     return `${digits.slice(0, 6)}-${digits[6]}`;
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setWasSubmitted(true);
 
     if (!isFormValid) return;
 
     if (loginType === "email") {
-      login({ email, password }).then(() => {
+      await login({ email, password }).then(() => {
         navigate(RoutesPrivateEnums.Home);
       });
     } else {
-      login({ agency, account, password });
+      await login({ agency, account, password }).then(() => {
+        navigate(RoutesPrivateEnums.Home);
+      });
     }
   };
 
