@@ -7,7 +7,7 @@ import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signInWith
 import type { IAccount, IUser } from "../types/types";
 import { useAppDispatch } from "../utils/useStore";
 import { setAccount, setUser } from "../redux/globalReducer/slice";
-import { redirect } from "react-router-dom";
+import { redirect, type NavigateFunction } from "react-router-dom";
 import { RoutesEnums } from "../types/enums";
 
 export const useAuthentication = () => {
@@ -123,12 +123,12 @@ export const useAuthentication = () => {
     }
   };
 
-  const logout = async () => {
+  const logout = async (navigate: NavigateFunction) => {
     await signOut(auth);
     dispatch(setUser(null));
     dispatch(setAccount(null));
 
-    window.location.href = "/";
+    navigate(RoutesEnums.Login);
   };
 
   const verifyLogged = (): Promise<IUser | null> => {

@@ -1,6 +1,3 @@
-import Main from "./components/Main";
-import Header from "./components/Header";
-
 import { privateRoutes, screensRoutes } from "./app/routes";
 import { createBrowserRouter, RouterProvider, type RouteObject } from "react-router-dom";
 import { useAuthentication } from "./hooks/useAuthentication";
@@ -18,10 +15,7 @@ function App() {
 
   return (
     <>
-      <Header />
-      <Main>
-        <RouterProvider router={router} />
-      </Main>
+      <RouterProvider router={router} />
     </>
   );
 }

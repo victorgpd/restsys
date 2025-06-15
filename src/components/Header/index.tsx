@@ -6,9 +6,12 @@ import { setMenuIsOpen } from "../../redux/globalReducer/slice";
 import { RoutesEnums } from "../../types/enums";
 import { useEffect } from "react";
 import { useAuthentication } from "../../hooks/useAuthentication";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
   const { logout, verifyLogged } = useAuthentication();
   const { menuIsOpen, user } = useAppSelector((state) => state.globalReducer);
 
@@ -28,7 +31,7 @@ const Header = () => {
         {window.location.pathname.includes("home") && (
           <Button type="text" onClick={handleToggleMenu} icon={menuIsOpen ? <CloseOutlined style={{ color: "#fff" }} /> : <MenuOutlined style={{ color: "#fff" }} />} style={{ fontSize: "1.5rem" }} />
         )}
-        <HeaderLinkLogo href="/">
+        <HeaderLinkLogo onClick={() => navigate(RoutesEnums.Home)}>
           <HeaderLogotipo src="/images/logo-vertical.png" alt="Logotipo" />
           <HeaderTitle>ResSys</HeaderTitle>
         </HeaderLinkLogo>
@@ -37,10 +40,10 @@ const Header = () => {
       <HeaderContainerButtons>
         {!user ? (
           <>
-            <Button type="link" style={{ color: "#fff" }} onClick={() => (window.location.href = RoutesEnums.Login)}>
+            <Button type="link" style={{ color: "#fff" }} onClick={() => navigate(RoutesEnums.Login)}>
               Entrar
             </Button>
-            <Button type="primary" onClick={() => (window.location.href = RoutesEnums.Register)}>
+            <Button type="primary" onClick={() => navigate(RoutesEnums.Register)}>
               Cadastrar
             </Button>
           </>
@@ -53,7 +56,7 @@ const Header = () => {
             </Tooltip>
 
             <Tooltip title="Sair">
-              <Button type="text" icon={<LogoutOutlined style={{ fontSize: "20px", color: "#fff" }} />} onClick={logout} />
+              <Button type="text" icon={<LogoutOutlined style={{ fontSize: "20px", color: "#fff" }} />} onClick={() => logout(navigate)} />
             </Tooltip>
           </>
         )}
