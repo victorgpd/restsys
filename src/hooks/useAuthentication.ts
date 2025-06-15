@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDocument } from "./useDocuments";
 import { app, db } from "../firebase/config";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 import type { IAccount, IUser } from "../types/types";
 import { useAppDispatch } from "../utils/useStore";
@@ -123,6 +123,14 @@ export const useAuthentication = () => {
     }
   };
 
+  const logout = async () => {
+    await signOut(auth);
+    dispatch(setUser(null));
+    dispatch(setAccount(null));
+
+    window.location.href = "/";
+  };
+
   const verifyLogged = (): Promise<IUser | null> => {
     return new Promise((resolve, reject) => {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -169,6 +177,7 @@ export const useAuthentication = () => {
     error,
     loading,
     login,
+    logout,
     register,
     verifyLogged,
     verifyLoggedIn,

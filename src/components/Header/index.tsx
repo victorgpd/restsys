@@ -1,6 +1,6 @@
-import { Button } from "antd";
-import { HeaderContainer, HeaderContainerButtons, HeaderLinkLogo, HeaderLogoContainer, HeaderLogotipo, HeaderTitle } from "./styles";
-import { CloseOutlined, MenuOutlined } from "@ant-design/icons";
+import { Button, Tooltip } from "antd";
+import { BellFilled, CloseOutlined, LogoutOutlined, MenuOutlined } from "@ant-design/icons";
+import { HeaderContainer, HeaderContainerButtons, HeaderLinkLogo, HeaderLogoContainer, HeaderLogotipo, HeaderTitle, UserNameContainer } from "./styles";
 import { useAppDispatch, useAppSelector } from "../../utils/useStore";
 import { setMenuIsOpen } from "../../redux/globalReducer/slice";
 import { RoutesEnums } from "../../types/enums";
@@ -9,17 +9,18 @@ import { useAuthentication } from "../../hooks/useAuthentication";
 
 const Header = () => {
   const dispatch = useAppDispatch();
-
-  const { verifyLogged } = useAuthentication();
+  const { logout, verifyLogged } = useAuthentication();
   const { menuIsOpen, user } = useAppSelector((state) => state.globalReducer);
 
   useEffect(() => {
     verifyLogged();
-  }, []);
+  }, [verifyLogged, user]);
 
   const handleToggleMenu = () => {
     dispatch(setMenuIsOpen(!menuIsOpen));
   };
+
+  const handleCapitalizeWord = (word: string) => word.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
     <HeaderContainer style={window.location.pathname.includes("home") ? { width: menuIsOpen ? "calc(100% - 246px)" : "100%", left: menuIsOpen ? 246 : 0 } : { width: "100%", left: 0 }}>
@@ -34,33 +35,26 @@ const Header = () => {
       </HeaderLogoContainer>
 
       <HeaderContainerButtons>
-        {!user && (
+        {!user ? (
           <>
-            <Button
-              type="link"
-              variant="link"
-              style={{ color: "#fff" }}
-              onClick={() => {
-                window.location.href = RoutesEnums.Login;
-              }}
-            >
+            <Button type="link" style={{ color: "#fff" }} onClick={() => (window.location.href = RoutesEnums.Login)}>
               Entrar
             </Button>
-            <Button
-              variant="solid"
-              color="blue"
-              onClick={() => {
-                window.location.href = RoutesEnums.Register;
-              }}
-            >
+            <Button type="primary" onClick={() => (window.location.href = RoutesEnums.Register)}>
               Cadastrar
             </Button>
           </>
-        )}
-
-        {user && (
+        ) : (
           <>
-            <span>{user.name}</span>
+            <UserNameContainer>{handleCapitalizeWord(user.name)}</UserNameContainer>
+
+            <Tooltip title="Notificações">
+              <Button type="text" icon={<BellFilled style={{ fontSize: "20px", color: "#fff" }} />} />
+            </Tooltip>
+
+            <Tooltip title="Sair">
+              <Button type="text" icon={<LogoutOutlined style={{ fontSize: "20px", color: "#fff" }} />} onClick={logout} />
+            </Tooltip>
           </>
         )}
       </HeaderContainerButtons>

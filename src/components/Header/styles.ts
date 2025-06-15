@@ -56,3 +56,9 @@ export const HeaderContainerButtons = styled.div`
   display: flex;
   align-items: center;
 `;
+
+export const UserNameContainer = styled.span`
+  color: #fff;
+  font-weight: 500;
+  margin-right: 8px;
+`;
