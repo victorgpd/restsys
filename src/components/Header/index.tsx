@@ -49,7 +49,7 @@ const Header = () => {
           </>
         ) : (
           <>
-            <UserNameContainer>{handleCapitalizeWord(user.name)}</UserNameContainer>
+            <UserNameContainer>{handleCapitalizeWord(user?.name)}</UserNameContainer>
 
             <Tooltip title="Notificações">
               <Button type="text" icon={<BellFilled style={{ fontSize: "20px", color: "#fff" }} />} />
