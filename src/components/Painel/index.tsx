@@ -6,8 +6,8 @@ const Painel = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <MenuContainer style={{ left: menuIsOpen ? 0 : "-246px" }}></MenuContainer>
-      <PainelContainer style={{ paddingLeft: menuIsOpen ? 246 : 0 }}>{children}</PainelContainer>
+      <MenuContainer isOpen={menuIsOpen}></MenuContainer>
+      <PainelContainer isOpen={menuIsOpen}>{children}</PainelContainer>
     </>
   );
 };

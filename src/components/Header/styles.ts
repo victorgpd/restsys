@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
-export const HeaderContainer = styled.header`
-  width: calc(100% - 246px);
+export const HeaderContainer = styled.header<{ isOpen: boolean }>`
+  width: ${({ isOpen }) => (isOpen ? "calc(100% - 246px)" : "100%")};
   height: 70px;
   padding: 10px 24px;
 
@@ -15,7 +15,7 @@ export const HeaderContainer = styled.header`
 
   position: fixed;
   top: 0;
-  left: 246px;
+  left: ${({ isOpen }) => (isOpen ? "246px" : "0px")};
 
   z-index: 1;
 

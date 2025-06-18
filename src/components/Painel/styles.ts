@@ -1,10 +1,13 @@
 import styled from "styled-components";
 
-export const PainelContainer = styled.div`
+export const PainelContainer = styled.div<{ isOpen: boolean }>`
+  background-color: #eef0f3;
+  padding-left: ${({ isOpen }) => (isOpen ? "246px" : 0)};
+
   transition: padding 0.3s ease-in-out;
 `;
 
-export const MenuContainer = styled.aside`
+export const MenuContainer = styled.aside<{ isOpen: boolean }>`
   width: 246px;
   height: 100vh;
 
@@ -14,7 +17,7 @@ export const MenuContainer = styled.aside`
 
   position: fixed;
   top: 0;
-  left: 0;
+  left: ${({ isOpen }) => (isOpen ? 0 : "-246px")};
 
   z-index: 2;
 

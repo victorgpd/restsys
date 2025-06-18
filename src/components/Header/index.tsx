@@ -17,7 +17,7 @@ const Header = () => {
 
   useEffect(() => {
     verifyLogged();
-  }, [verifyLogged, user]);
+  }, [verifyLogged]);
 
   const handleToggleMenu = () => {
     dispatch(setMenuIsOpen(!menuIsOpen));
@@ -26,7 +26,7 @@ const Header = () => {
   const handleCapitalizeWord = (word: string) => word.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
-    <HeaderContainer style={window.location.pathname.includes("home") ? { width: menuIsOpen ? "calc(100% - 246px)" : "100%", left: menuIsOpen ? 246 : 0 } : { width: "100%", left: 0 }}>
+    <HeaderContainer isOpen={menuIsOpen}>
       <HeaderLogoContainer>
         {window.location.pathname.includes("home") && (
           <Button type="text" onClick={handleToggleMenu} icon={menuIsOpen ? <CloseOutlined style={{ color: "#fff" }} /> : <MenuOutlined style={{ color: "#fff" }} />} style={{ fontSize: "1.5rem" }} />
